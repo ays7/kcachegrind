@@ -33,6 +33,9 @@
 int main( int argc, char ** argv )
 {
     QApplication app(argc, argv);
+
+    app.setAttribute(Qt::AA_UseHighDpiPixmaps);
+  
     Loader::initLoaders();
 
     QCoreApplication::setOrganizationName(QStringLiteral("kcachegrind.github.io"));

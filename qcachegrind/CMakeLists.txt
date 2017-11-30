@@ -14,5 +14,18 @@ target_link_libraries(qcachegrind
         Qt5::Widgets
         Qt5::DBus)
 
+if(APPLE)
+  # bundle stuff
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
+  set(DATA_INSTALL_DIR   "qcachegrind.app/Contents/Resources")
+
+  if(QT_MAC_USE_COCOA AND EXISTS "${QT_LIBRARY_DIR}/Resources/qt_menu.nib")
+    install(DIRECTORY "${QT_LIBRARY_DIR}/Resources/qt_menu.nib"
+            DESTINATION "${DATA_INSTALL_DIR}")
+  endif()
+
+endif(APPLE)
+      
+
 # do not install example code...
 # install(TARGETS qcachegrind ${KDE_INSTALL_TARGETS_DEFAULT_ARGS} )

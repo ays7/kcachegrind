@@ -22,9 +22,9 @@ include(ECMAddAppIcon)
 
 find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED Core DBus Gui Widgets)
 
-find_package(KF5 REQUIRED
-  Archive CoreAddons DocTools WidgetsAddons XmlGui I18n Config KIO
-)
+#find_package(KF5 REQUIRED
+#  Archive CoreAddons DocTools WidgetsAddons XmlGui I18n Config KIO
+#)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 add_definitions(-DQT_STRICT_ITERATORS)
@@ -42,11 +42,11 @@ IF(NOT WIN32)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/kcachegrind.lsm.cmake ${CMAKE_CURRENT_BINARY_DIR}/kcachegrind.lsm )
 ENDIF(NOT WIN32)
 
-add_subdirectory( doc )
+#add_subdirectory( doc )
 add_subdirectory( libcore )
 add_subdirectory( cgview )
 add_subdirectory( libviews )
-add_subdirectory( kcachegrind )
+#add_subdirectory( kcachegrind )
 add_subdirectory( qcachegrind )
 add_subdirectory( pics )
 add_subdirectory( converters )
