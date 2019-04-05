@@ -36,7 +36,7 @@ public:
     // Visualization inside of trace parts
     enum VisualizationMode { NoVisualization, Partitioning, Inclusive };
 
-    explicit PartAreaWidget(QWidget* parent=0);
+    explicit PartAreaWidget(QWidget* parent=nullptr);
 
     void setData(TraceData* d);
     void setEventType(EventType* ct);
@@ -54,7 +54,7 @@ public:
     int callLevels() const { return _callLevels; }
 
     QColor groupColor(TraceFunction*) const;
-    QString tipString(TreeMapItem*) const;
+    QString tipString(TreeMapItem*) const override;
 
     void changeHidden(const TracePartList& list);
     bool isHidden(TracePart*) const;
@@ -80,12 +80,12 @@ public:
 
     void setData(TraceData* d);
 
-    int rtti() const { return 1; }
-    double value() const;
-    QString text(int) const;
-    int borderWidth() const { return 0; }
-    TreeMapItemList* children();
-    QColor backColor() const;
+    int rtti() const override { return 1; }
+    double value() const override;
+    QString text(int) const override;
+    int borderWidth() const override { return 0; }
+    TreeMapItemList* children() override;
+    QColor backColor() const override;
 
 private:
     TraceData* _data;
@@ -95,15 +95,15 @@ class PartItem: public TreeMapItem
 {
 public:
     explicit PartItem(TracePart* p);
-    int rtti() const { return 2; }
+    int rtti() const override { return 2; }
     TracePart* part() { return _p; }
-    double value() const;
-    double sum() const;
-    int borderWidth() const { return 0; }
-    QString text(int) const;
-    QPixmap pixmap(int) const;
-    TreeMapItemList* children();
-    QColor backColor() const;
+    double value() const override;
+    double sum() const override;
+    int borderWidth() const override { return 0; }
+    QString text(int) const override;
+    QPixmap pixmap(int) const override;
+    TreeMapItemList* children() override;
+    QColor backColor() const override;
 
 private:
     TracePart* _p;
@@ -114,15 +114,15 @@ class SubPartItem: public TreeMapItem
 {
 public:
     explicit SubPartItem(ProfileCostArray*);
-    int rtti() const { return 3; }
+    int rtti() const override { return 3; }
     ProfileCostArray* partCostItem() { return _partCostItem; }
-    double value() const;
-    double sum() const;
-    SplitMode splitMode() const { return Vertical; }
-    QString text(int) const;
-    QPixmap pixmap(int) const;
-    TreeMapItemList* children();
-    QColor backColor() const;
+    double value() const override;
+    double sum() const override;
+    SplitMode splitMode() const override { return Vertical; }
+    QString text(int) const override;
+    QPixmap pixmap(int) const override;
+    TreeMapItemList* children() override;
+    QColor backColor() const override;
 
 private:
     ProfileCostArray* _partCostItem;

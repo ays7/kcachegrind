@@ -44,12 +44,12 @@ class ConfigDlg : public ConfigDlgBase
 
 public:
     ConfigDlg(GlobalGUIConfig*, TraceData*,
-              QWidget* parent = 0);
-    ~ConfigDlg();
+              QWidget* parent = nullptr);
+    ~ConfigDlg() override;
 
     static bool configure(GlobalGUIConfig*, TraceData*, QWidget*);
 
-protected slots:
+protected Q_SLOTS:
     void objectActivated(const QString &);
     void objectCheckChanged(bool);
     void objectColorChanged(const QColor &);

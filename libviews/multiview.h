@@ -38,30 +38,30 @@ class MultiView : public QSplitter, public TraceItemView
     Q_OBJECT
 
 public:
-    explicit MultiView(TopLevelBase* top, QWidget* parent = 0);
+    explicit MultiView(TopLevelBase* top, QWidget* parent = nullptr);
 
-    QWidget* widget() { return this; }
+    QWidget* widget() override { return this; }
     TabView* activeTabView() const { return _active; }
-    void setData(TraceData*);
+    void setData(TraceData*) override;
 
     void appendView();
     void removeView();
     void setChildCount(int);
     int childCount() { return _views.count(); }
 
-    void selected(TraceItemView*, CostItem*);
-    void activated(TraceItemView*, CostItem*);
+    void selected(TraceItemView*, CostItem*) override;
+    void activated(TraceItemView*, CostItem*) override;
 
-    void saveLayout(const QString& prefix, const QString& postfix);
-    void restoreLayout(const QString& prefix, const QString& postfix);
-    void saveOptions(const QString& prefix, const QString& postfix);
-    void restoreOptions(const QString& prefix, const QString& postfix);
+    void saveLayout(const QString& prefix, const QString& postfix) override;
+    void restoreLayout(const QString& prefix, const QString& postfix) override;
+    void saveOptions(const QString& prefix, const QString& postfix) override;
+    void restoreOptions(const QString& prefix, const QString& postfix) override;
 
-public slots:
+public Q_SLOTS:
     void tabActivated(TabView*);
 
 private:
-    void doUpdate(int, bool);
+    void doUpdate(int, bool) override;
 
     TabView* _active;
     QList<TabView*> _views;

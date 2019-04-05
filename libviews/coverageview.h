@@ -35,23 +35,23 @@ class CoverageView: public QTreeWidget, public TraceItemView
 
 public:
     CoverageView(bool showCallers, TraceItemView* parentView,
-                 QWidget* parent = 0);
+                 QWidget* parent = nullptr);
 
-    virtual QWidget* widget() { return this; }
-    QString whatsThis() const;
+    QWidget* widget() override { return this; }
+    QString whatsThis() const override;
 
-protected slots:
+protected Q_SLOTS:
     void context(const QPoint &);
     void selectedSlot(QTreeWidgetItem*, QTreeWidgetItem*);
     void activatedSlot(QTreeWidgetItem*, int);
     void headerClicked(int);
 
 protected:
-    void keyPressEvent(QKeyEvent* event);
+    void keyPressEvent(QKeyEvent* event) override;
 
 private:
-    CostItem* canShow(CostItem*);
-    void doUpdate(int, bool);
+    CostItem* canShow(CostItem*) override;
+    void doUpdate(int, bool) override;
     void refresh();
 
     HighestCostList _hc;

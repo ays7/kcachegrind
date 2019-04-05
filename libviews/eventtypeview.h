@@ -36,18 +36,18 @@ public:
     explicit EventTypeView(TraceItemView* parentView,
                            QWidget* parent, const QString& name);
 
-    virtual QWidget* widget() { return this; }
-    QString whatsThis() const;
+    QWidget* widget() override { return this; }
+    QString whatsThis() const override;
 
-private slots:
+private Q_SLOTS:
     void context(const QPoint&);
     void currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*);
     void itemDoubleClicked(QTreeWidgetItem*, int);
     void itemChanged(QTreeWidgetItem*, int);
 
 private:
-    CostItem* canShow(CostItem*);
-    void doUpdate(int, bool);
+    CostItem* canShow(CostItem*) override;
+    void doUpdate(int, bool) override;
     void refresh();
 };
 

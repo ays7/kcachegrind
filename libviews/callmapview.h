@@ -41,19 +41,19 @@ public:
     CallMapView(bool showCallers, TraceItemView* parentView,
                 QWidget* parent, const QString& name);
 
-    QWidget* widget() { return this; }
-    QString whatsThis() const;
-    void setData(TraceData*);
+    QWidget* widget() override { return this; }
+    QString whatsThis() const override;
+    void setData(TraceData*) override;
 
-    void restoreOptions(const QString& prefix, const QString& postfix);
-    void saveOptions(const QString& prefix, const QString& postfix);
+    void restoreOptions(const QString& prefix, const QString& postfix) override;
+    void saveOptions(const QString& prefix, const QString& postfix) override;
 
     bool showCallers() const { return _showCallers; }
     ProfileCostArray* totalCost();
-    QString tipString(TreeMapItem*) const;
+    QString tipString(TreeMapItem*) const override;
     QColor groupColor(TraceFunction*) const;
 
-private slots:
+private Q_SLOTS:
     void context(TreeMapItem*,const QPoint &);
     void selectedSlot(TreeMapItem*, bool);
     void activatedSlot(TreeMapItem*);
@@ -64,8 +64,8 @@ private slots:
     void borderWidthTriggered(QAction*);
 
 private:
-    CostItem* canShow(CostItem*);
-    void doUpdate(int, bool);
+    CostItem* canShow(CostItem*) override;
+    void doUpdate(int, bool) override;
 
     // context menu builders
     void addItemListMenu(QMenu*,TreeMapItem*);
@@ -94,10 +94,10 @@ private:
 class CallMapItemBase: public TreeMapItem
 {
 public:
-    int maxLines(int) const;
-    bool allowBreak(int) const;
-    bool allowTruncation(int) const;
-    Position position(int) const;
+    int maxLines(int) const override;
+    bool allowBreak(int) const override;
+    bool allowTruncation(int) const override;
+    Position position(int) const override;
 };
 
 class CallMapRootItem: public CallMapItemBase
@@ -107,14 +107,14 @@ public:
 
     void setFunction(TraceFunction* f);
     TraceFunction* function() { return _f; }
-    int rtti() const { return 1; }
-    double sum() const;
-    double value() const;
-    bool isMarked(int) const;
-    QString text(int) const;
-    QPixmap pixmap(int) const;
-    TreeMapItemList* children();
-    QColor backColor() const;
+    int rtti() const override { return 1; }
+    double sum() const override;
+    double value() const override;
+    bool isMarked(int) const override;
+    QString text(int) const override;
+    QPixmap pixmap(int) const override;
+    TreeMapItemList* children() override;
+    QColor backColor() const override;
 
 private:
     TraceFunction* _f;
@@ -126,16 +126,16 @@ class CallMapCallingItem: public CallMapItemBase
 public:
     CallMapCallingItem(double factor, TraceCall* c);
     void init();
-    int rtti() const { return 2; }
-    int borderWidth() const { return widget()->borderWidth(); }
+    int rtti() const override { return 2; }
+    int borderWidth() const override { return widget()->borderWidth(); }
     TraceFunction* function() { return _c->called(); }
-    double value() const;
-    double sum() const;
-    bool isMarked(int) const;
-    QString text(int) const;
-    QPixmap pixmap(int) const;
-    TreeMapItemList* children();
-    QColor backColor() const;
+    double value() const override;
+    double sum() const override;
+    bool isMarked(int) const override;
+    QString text(int) const override;
+    QPixmap pixmap(int) const override;
+    TreeMapItemList* children() override;
+    QColor backColor() const override;
 
 private:
     TraceCall* _c;
@@ -146,15 +146,15 @@ class CallMapCallerItem: public CallMapItemBase
 {
 public:
     CallMapCallerItem(double factor, TraceCall* c);
-    int rtti() const { return 3; }
-    int borderWidth() const { return widget()->borderWidth(); }
+    int rtti() const override { return 3; }
+    int borderWidth() const override { return widget()->borderWidth(); }
     TraceFunction* function() { return _c->caller(); }
-    double value() const;
-    bool isMarked(int) const;
-    QString text(int i) const;
-    QPixmap pixmap(int) const;
-    TreeMapItemList* children();
-    QColor backColor() const;
+    double value() const override;
+    bool isMarked(int) const override;
+    QString text(int i) const override;
+    QPixmap pixmap(int) const override;
+    TreeMapItemList* children() override;
+    QColor backColor() const override;
 
 private:
     TraceCall* _c;

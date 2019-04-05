@@ -38,8 +38,8 @@ public:
                        TraceFunction* base,
                        EventType* ct, ProfileContext::Type gt);
 
-    bool operator< ( const QTreeWidgetItem & other ) const;
-    TraceFunction* function() { return (_skipped) ? 0 : _function; }
+    bool operator< ( const QTreeWidgetItem & other ) const override;
+    TraceFunction* function() { return (_skipped) ? nullptr : _function; }
     void setCostType(EventType* ct);
     void setGroupType(ProfileContext::Type);
     void update();
@@ -66,8 +66,8 @@ public:
                        TraceFunction* base,
                        EventType* ct, ProfileContext::Type gt);
 
-    bool operator< ( const QTreeWidgetItem & other ) const;
-    TraceFunction* function() { return (_skipped) ? 0 : _function; }
+    bool operator< ( const QTreeWidgetItem & other ) const override;
+    TraceFunction* function() { return (_skipped) ? nullptr : _function; }
     void setCostType(EventType* ct);
     void setGroupType(ProfileContext::Type);
     void update();

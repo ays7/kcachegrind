@@ -48,8 +48,8 @@ public:
     void activate(QString);
     QString currentPage();
 
-public slots:
-    void accept();
+public Q_SLOTS:
+    void accept() override;
     void listItemChanged(QString);
     void clearError();
 

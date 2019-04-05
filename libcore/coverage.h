@@ -47,7 +47,7 @@ public:
 
     Coverage();
 
-    virtual int rtti() { return Rtti; }
+    int rtti() override { return Rtti; }
     void init();
 
     TraceFunction* function() { return _function; }

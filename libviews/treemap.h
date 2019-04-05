@@ -104,20 +104,20 @@ public:
                               bool selected = false, bool current = false);
 
     // getters
-    QString  text(int) const;
-    QPixmap  pixmap(int) const;
-    Position position(int) const;
-    int      maxLines(int) const;
-    int      fieldCount() const { return _field.size(); }
+    QString  text(int) const override;
+    QPixmap  pixmap(int) const override;
+    Position position(int) const override;
+    int      maxLines(int) const override;
+    int      fieldCount() const override { return _field.size(); }
 
-    QColor   backColor() const { return _backColor; }
-    bool selected() const { return _selected; }
-    bool current() const { return _current; }
-    bool shaded() const { return _shaded; }
-    bool rotated() const { return _rotated; }
-    bool drawFrame() const { return _drawFrame; }
+    QColor   backColor() const override { return _backColor; }
+    bool selected() const override { return _selected; }
+    bool current() const override { return _current; }
+    bool shaded() const override { return _shaded; }
+    bool rotated() const override { return _rotated; }
+    bool drawFrame() const override { return _drawFrame; }
 
-    const QFont& font() const;
+    const QFont& font() const override;
 
     // attribute setters
     void setField(int f, const QString& t, const QPixmap& pm = QPixmap(),
@@ -177,18 +177,18 @@ public:
     void setDrawParams(DrawParams*);
 
     // draw on a given QPainter, use this class as info provider per default
-    void drawBack(QPainter*, DrawParams* dp = 0);
+    void drawBack(QPainter*, DrawParams* dp = nullptr);
     /* Draw field at position() from pixmap()/text() with maxLines().
      * Returns true if something was drawn
      */
-    bool drawField(QPainter*, int f, DrawParams* dp = 0);
+    bool drawField(QPainter*, int f, DrawParams* dp = nullptr);
 
     // resets rectangle for free space
     void setRect(const QRect&);
 
     // Returns the rectangle area still free of text/pixmaps after
     // a number of drawText() calls.
-    QRect remainingRect(DrawParams* dp = 0);
+    QRect remainingRect(DrawParams* dp = nullptr);
 
 private:
     int _usedTopLeft, _usedTopCenter, _usedTopRight;
@@ -241,11 +241,11 @@ public:
                      HAlternate, VAlternate,
                      Horizontal, Vertical };
 
-    explicit TreeMapItem(TreeMapItem* parent = 0, double value = 1.0 );
+    explicit TreeMapItem(TreeMapItem* parent = nullptr, double value = 1.0 );
     TreeMapItem(TreeMapItem* parent, double value,
                 const QString& text1, const QString& text2 = QString(),
                 const QString& text3 = QString(), const QString& text4 = QString());
-    virtual ~TreeMapItem();
+    ~TreeMapItem() override;
 
     bool isChildOf(TreeMapItem*);
 
@@ -326,8 +326,8 @@ public:
     virtual double sum() const;
     virtual double value() const;
     // replace "Default" position with setting from TreeMapWidget
-    virtual Position position(int) const;
-    virtual const QFont& font() const;
+    Position position(int) const override;
+    const QFont& font() const override;
     virtual bool isMarked(int) const;
 
     virtual int borderWidth() const;
@@ -343,8 +343,8 @@ public:
     /**
      * Set the sorting for child drawing.
      *
-     * Default is no sorting: <textNo> = -1
-     * For value() sorting, use <textNo> = -2
+     * Default is no sorting: @p textNo = -1
+     * For value() sorting, use @p textNo = -2
      *
      * For fast sorting, set this to -1 before child insertions and call
      * again after inserting all children.
@@ -405,8 +405,8 @@ public:
     enum SelectionMode { Single, Multi, Extended, NoSelection };
 
     /* The widget gets owner of the base item */
-    explicit TreeMapWidget(TreeMapItem* base, QWidget* parent=0);
-    ~TreeMapWidget();
+    explicit TreeMapWidget(TreeMapItem* base, QWidget* parent=nullptr);
+    ~TreeMapWidget() override;
 
     /**
      * Returns the TreeMapItem filling out the widget space
@@ -445,11 +445,11 @@ public:
     void setSelected(TreeMapItem*, bool selected = true);
 
     /**
-     * Switches on the marking <markNo>. Marking 0 switches off marking.
+     * Switches on the marking @p markNo. Marking 0 switches off marking.
      * This is mutually exclusive to selection, and is automatically
      * switched off when selection is changed (also by the user).
      * Marking is visually the same as selection, and is based on
-     * TreeMapItem::isMarked(<markNo>).
+     * TreeMapItem::isMarked(@c markNo).
      * This enables to programmatically show multiple selected items
      * at once even in single selection mode.
      */
@@ -460,7 +460,7 @@ public:
      * parent. When parent == 0, clears whole selection
      * Returns true if selection changed.
      */
-    bool clearSelection(TreeMapItem* parent = 0);
+    bool clearSelection(TreeMapItem* parent = nullptr);
 
     /**
      * Selects or unselects items in a range.
@@ -518,10 +518,10 @@ public:
 
     /**
      * Items usually have a size proportional to their value().
-     * With <width>, you can give the minimum width
+     * With @p width, you can give the minimum width
      * of the resulting rectangle to still be drawn.
      * For space not used because of to small items, you can specify
-     * with <reuseSpace> if the background should shine through or
+     * with @p reuseSpace if the background should shine through or
      * the space will be used to enlarge the next item to be drawn
      * at this level.
      */
@@ -529,14 +529,14 @@ public:
 
     /**
      * If a children value() is almost the parents sum(),
-     * it can happen that the border to be drawn for visibilty of
+     * it can happen that the border to be drawn for visibility of
      * nesting relations takes to much space, and the
      * parent/child size relation can not be mapped to a correct
      * area size relation.
      *
      * Either
      * (1) Ignore the incorrect drawing, or
-     * (2) Skip drawing of the parent level alltogether.
+     * (2) Skip drawing of the parent level altogether.
      */
     void setSkipIncorrectBorder(bool enable = true);
     bool skipIncorrectBorder() const { return _skipIncorrectBorder; }
@@ -644,17 +644,17 @@ public:
     // used internally when items are destroyed
     void deletingItem(TreeMapItem*);
 
-protected slots:
+protected Q_SLOTS:
     void splitActivated(QAction*);
 
-signals:
+Q_SIGNALS:
     void selectionChanged();
     void selectionChanged(TreeMapItem*);
 
     /**
      * This signal is emitted if the current item changes.
      * If the change is done because of keyboard navigation,
-     * the <kbd> is set to true
+     * the @p keyboard is set to true
      */
     void currentChanged(TreeMapItem*, bool keyboard);
     void clicked(TreeMapItem*);
@@ -664,15 +664,15 @@ signals:
     void contextMenuRequested(TreeMapItem*, const QPoint &);
 
 protected:
-    void mousePressEvent( QMouseEvent * );
-    void contextMenuEvent( QContextMenuEvent * );
-    void mouseReleaseEvent( QMouseEvent * );
-    void mouseMoveEvent( QMouseEvent * );
-    void mouseDoubleClickEvent( QMouseEvent * );
-    void keyPressEvent( QKeyEvent* );
-    void paintEvent( QPaintEvent * );
+    void mousePressEvent( QMouseEvent * ) override;
+    void contextMenuEvent( QContextMenuEvent * ) override;
+    void mouseReleaseEvent( QMouseEvent * ) override;
+    void mouseMoveEvent( QMouseEvent * ) override;
+    void mouseDoubleClickEvent( QMouseEvent * ) override;
+    void keyPressEvent( QKeyEvent* ) override;
+    void paintEvent( QPaintEvent * ) override;
     void fontChange( const QFont& );
-    bool event(QEvent *event);
+    bool event(QEvent *event) override;
 
 private:
     TreeMapItemList diff(TreeMapItemList&, TreeMapItemList&);

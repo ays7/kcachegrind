@@ -48,7 +48,7 @@ class FunctionSelection: public QWidget, public TraceItemView
     Q_OBJECT
 
 public:
-    explicit FunctionSelection(TopLevelBase*, QWidget* parent = 0);
+    explicit FunctionSelection(TopLevelBase*, QWidget* parent = nullptr);
 
     TraceCostItem* group() { return _group; }
     TraceCostItem* group(QString);
@@ -56,13 +56,13 @@ public:
     void query(QString);
     bool selectTopFunction();
 
-    QWidget* widget() { return this; }
-    QString whatsThis() const;
-    void setData(TraceData*);
+    QWidget* widget() override { return this; }
+    QString whatsThis() const override;
+    void setData(TraceData*) override;
 
     void updateGroupingMenu(QMenu*);
 
-public slots:
+public Q_SLOTS:
     void searchReturnPressed();
     void searchChanged(const QString&);
     void queryDelayed();
@@ -79,8 +79,8 @@ public slots:
     void functionHeaderClicked(int);
 
 private:
-    CostItem* canShow(CostItem* i);
-    void doUpdate(int, bool);
+    CostItem* canShow(CostItem* i) override;
+    void doUpdate(int, bool) override;
     void selectFunction();
     void refresh();
     void setCostColumnWidths();
@@ -118,13 +118,13 @@ class AutoToolTipDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit AutoToolTipDelegate(QObject* parent = 0);
-    ~AutoToolTipDelegate();
+    explicit AutoToolTipDelegate(QObject* parent = nullptr);
+    ~AutoToolTipDelegate() override;
 
-public slots:
+public Q_SLOTS:
     bool helpEvent( QHelpEvent* e, QAbstractItemView* view,
                     const QStyleOptionViewItem& option,
-                    const QModelIndex& index );
+                    const QModelIndex& index ) override;
 };
 
 #endif

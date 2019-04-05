@@ -29,6 +29,7 @@
 #include <KAboutData>
 #include <KLocalizedString>
 #include <KSharedConfig>
+#include <KDBusService>
 
 #include "kdeconfig.h"
 #include "toplevel.h"
@@ -49,8 +50,13 @@ int main( int argc, char ** argv )
     aboutData.addAuthor(i18n("Josef Weidendorfer"),
                         i18n("Author/Maintainer"),
                         QStringLiteral("Josef.Weidendorfer@gmx.de"));
+    aboutData.setOrganizationDomain("kde.org");
+    aboutData.setDesktopFileName(QStringLiteral("org.kde.kcachegrind"));
 
     KAboutData::setApplicationData(aboutData);
+    QApplication::setWindowIcon(QIcon::fromTheme(QStringLiteral("kcachegrind")));
+
+    KDBusService service(KDBusService::Multiple);
 
     //   KGlobal::locale()->insertCatalog("kcachegrind_qt");
     Loader::initLoaders();
@@ -70,8 +76,6 @@ int main( int argc, char ** argv )
 
         QCommandLineParser parser;
         parser.addPositionalArgument(QStringLiteral("trace"), i18n("Show information of this trace"), i18n("[trace...]"));
-        parser.addVersionOption();
-        parser.addHelpOption();
         aboutData.setupCommandLine(&parser);
         parser.process(a);
         aboutData.processCommandLine(&parser);

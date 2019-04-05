@@ -39,11 +39,11 @@ class FixString {
 
 public:
     // constructor for an invalid string
-    FixString() { _len = 0; _str = 0; }
+    FixString() { _len = 0; _str = nullptr; }
 
     /**
      * FixString never does a deep copy! You have to make sure that
-     * the string starting at the char pointer is valid trough the
+     * the string starting at the char pointer is valid through the
      * lifetime of FixString.
      */
     FixString(const char*, int len);
@@ -51,7 +51,7 @@ public:
     int len() { return _len; }
     const char* ascii() { return _str; }
     bool isEmpty() { return _len == 0; }
-    bool isValid() { return _str != 0; }
+    bool isValid() { return _str != nullptr; }
 
     // sets <c> to first character and returns true if length >0
     bool first(char& c)
@@ -104,7 +104,9 @@ public:
     ~FixFile();
 
     /**
-     * Read next line into <str>. Returns false on error or EOF.
+     * Read next line into @p str.
+     * @param str is the target string
+     * @returns false on error or EOF.
      */
     bool nextLine(FixString& str);
     bool exists() { return !_openError; }

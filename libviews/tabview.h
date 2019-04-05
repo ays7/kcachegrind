@@ -51,7 +51,7 @@ class TabBar : public QTabBar
 public:
     TabBar(TabView*, QTabWidget* parent);
 protected:
-    void mousePressEvent(QMouseEvent *e);
+    void mousePressEvent(QMouseEvent *e) override;
 
 private:
     void context(QWidget*, const QPoint &);
@@ -72,11 +72,11 @@ class Splitter: public QSplitter
     Q_OBJECT
 
 public:
-    explicit Splitter(Qt::Orientation o, QWidget* parent = 0);
+    explicit Splitter(Qt::Orientation o, QWidget* parent = nullptr);
     void checkVisiblity();
 
 protected:
-    void moveEvent(QMoveEvent *);
+    void moveEvent(QMoveEvent *) override;
 };
 
 
@@ -92,19 +92,19 @@ class TabWidget: public QTabWidget
 
 public:
 
-    explicit TabWidget(TabView*, QWidget* parent = 0);
+    explicit TabWidget(TabView*, QWidget* parent = nullptr);
 
     bool hasVisibleRect() { return _hasVisibleRect; }
     void checkVisibility();
 
-signals:
+Q_SIGNALS:
     void visibleRectChanged(TabWidget*);
 
 protected:
-    void resizeEvent(QResizeEvent *);
-    void showEvent(QShowEvent *);
-    void hideEvent(QHideEvent *);
-    void moveEvent(QMoveEvent *);
+    void resizeEvent(QResizeEvent *) override;
+    void showEvent(QShowEvent *) override;
+    void hideEvent(QHideEvent *) override;
+    void moveEvent(QMoveEvent *) override;
 
 private:
     bool _hasVisibleRect;
@@ -119,19 +119,22 @@ class TabView : public QWidget, public TraceItemView
 public:
 
     explicit TabView( TraceItemView* parentView,
-                      QWidget* parent = 0 );
+                      QWidget* parent = nullptr );
 
-    virtual QWidget* widget() { return this; }
-    QString whatsThis() const;
-    void setData(TraceData*);
-    bool isViewVisible() { return !_isCollapsed; }
-    void selected(TraceItemView*, CostItem*);
+    QWidget* widget() override { return this; }
+    QString whatsThis() const override;
+    void setData(TraceData*) override;
+    bool isViewVisible() override { return !_isCollapsed; }
+    void selected(TraceItemView*, CostItem*) override;
     bool active() const { return _active; }
     void setActive(bool);
 
     /**
      * Rearrange tabs
-     * if <w> == 0, move hidden tabs
+     * if @p w == 0, move hidden tabs
+     * @param w the widget
+     * @param p position
+     * @param wholeArea whether to move the whole area
      */
     void moveTab(QWidget* w, Position, bool wholeArea = false);
 
@@ -139,22 +142,22 @@ public:
     int visibleTabs();
     int visibleAreas();
 
-    void saveLayout(const QString& prefix, const QString& postfix);
-    void restoreLayout(const QString& prefix, const QString& postfix);
-    void saveOptions(const QString& prefix, const QString& postfix);
-    void restoreOptions(const QString& prefix, const QString& postfix);
+    void saveLayout(const QString& prefix, const QString& postfix) override;
+    void restoreLayout(const QString& prefix, const QString& postfix) override;
+    void saveOptions(const QString& prefix, const QString& postfix) override;
+    void restoreOptions(const QString& prefix, const QString& postfix) override;
 
-public slots:
+public Q_SLOTS:
     void tabChanged(int);
     void visibleRectChangedSlot(TabWidget*);
 
-signals:
+Q_SIGNALS:
     void tabActivated(TabView*);
 
 protected:
-    void resizeEvent(QResizeEvent *);
-    bool eventFilter(QObject*, QEvent*);
-    void mousePressEvent(QMouseEvent*);
+    void resizeEvent(QResizeEvent *) override;
+    bool eventFilter(QObject*, QEvent*) override;
+    void mousePressEvent(QMouseEvent*) override;
 
 private:
     TraceItemView* addTab(const QString&, TraceItemView*);
@@ -162,7 +165,7 @@ private:
     void addBottom(TraceItemView*);
     TabWidget* tabWidget(Position);
     void updateVisibility();
-    void doUpdate(int, bool);
+    void doUpdate(int, bool) override;
     void updateNameLabel(const QString &n = QString());
     void installFocusFilters();
     void tabCounts(int&, int&, int&, int&);

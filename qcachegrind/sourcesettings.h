@@ -35,13 +35,13 @@ class SourceSettings: public ConfigPage
 
 public:
     SourceSettings(TraceData* data, QWidget* parent);
-    virtual ~SourceSettings() {}
+    ~SourceSettings() override {}
 
-    bool check(QString&, QString&);
-    void accept();
-    void activate(QString s);
+    bool check(QString&, QString&) override;
+    void accept() override;
+    void activate(QString s) override;
 
-public slots:
+public Q_SLOTS:
     void addClicked();
     void deleteClicked();
     void browseClicked();

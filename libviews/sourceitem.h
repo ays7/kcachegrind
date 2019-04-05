@@ -37,7 +37,7 @@ public:
     SourceItem(SourceView* sv, QTreeWidget* parent,
                int fileno, unsigned int lineno,
                bool inside, const QString& src,
-               TraceLine* line = 0);
+               TraceLine* line = nullptr);
 
     // for call lines
     SourceItem(SourceView* sv, QTreeWidgetItem* parent,
@@ -57,7 +57,7 @@ public:
     TraceLineJump* lineJump() const { return _lineJump; }
     TraceLineJump* jump(int i) const { return _jump[i]; }
     int jumpCount() const { return _jump.size(); }
-    bool operator< ( const QTreeWidgetItem & other ) const;
+    bool operator< ( const QTreeWidgetItem & other ) const override;
 
     void updateGroup();
     void updateCost();
@@ -87,12 +87,12 @@ class SourceItemDelegate : public QItemDelegate
 public:
     explicit SourceItemDelegate(SourceView *parent);
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
-               const QModelIndex & index ) const;
+               const QModelIndex & index ) const override;
     QSize sizeHint(const QStyleOptionViewItem &option,
-                   const QModelIndex &index) const;
+                   const QModelIndex &index) const override;
     QWidget* createEditor(QWidget *parent,
                           const QStyleOptionViewItem &option,
-                          const QModelIndex &index) const;
+                          const QModelIndex &index) const override;
 
 protected:
     void paintArrows(QPainter *p,

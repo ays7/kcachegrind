@@ -47,7 +47,7 @@ class TraceItemViewUpdateTimer: public QTimer
 public:
     explicit TraceItemViewUpdateTimer(TraceItemView* view);
 
-private slots:
+private Q_SLOTS:
     void timeoutTriggered();
 
 private:
@@ -75,7 +75,7 @@ public:
 
     /**
      * Change type for update functions
-     * - <dataChanged> is used if e.g. cycles are recalculated
+     * - @c dataChanged is used if e.g. cycles are recalculated
      */
     enum { nothingChanged      = 0,
            eventTypeChanged    = 1,
@@ -92,7 +92,7 @@ public:
     // a TraceItemView can have a position in a parent container
     enum Position { Hidden, Top, Right, Left, Bottom };
 
-    explicit TraceItemView(TraceItemView* parentView, TopLevelBase* top = 0);
+    explicit TraceItemView(TraceItemView* parentView, TopLevelBase* top = nullptr);
     virtual ~TraceItemView();
 
     virtual QString whatsThis() const;
@@ -167,7 +167,7 @@ public:
     QString title() const { return _title; }
 
     // We depend on derived class to be a widget.
-    // Force overiding by making this abstract.
+    // Force overriding by making this abstract.
     virtual QWidget* widget() = 0;
 
     /**

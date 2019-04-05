@@ -40,8 +40,8 @@ class StackSelection : public QWidget
     Q_OBJECT
 
 public:
-    explicit StackSelection(QWidget* parent = 0);
-    ~StackSelection();
+    explicit StackSelection(QWidget* parent = nullptr);
+    ~StackSelection() override;
 
     TraceData* data() const { return _data; }
     void setData(TraceData*);
@@ -50,10 +50,10 @@ public:
     EventType* eventType2() { return _eventType2; }
     ProfileContext::Type groupType() { return _groupType; }
 
-signals:
+Q_SIGNALS:
     void functionSelected(CostItem*);
 
-public slots:
+public Q_SLOTS:
     void setFunction(TraceFunction*);
     void setEventType(EventType*);
     void setEventType2(EventType*);

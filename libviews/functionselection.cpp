@@ -87,9 +87,9 @@ bool AutoToolTipDelegate::helpEvent(QHelpEvent* e, QAbstractItemView* view,
 
 FunctionSelection::FunctionSelection( TopLevelBase* top,
                                       QWidget* parent)
-    : QWidget(parent), TraceItemView(0, top)
+    : QWidget(parent), TraceItemView(nullptr, top)
 {
-    _group = 0;
+    _group = nullptr;
     _inSetGroup = false;
     _inSetFunction = false;
     _functionListSortOrder = Qt::DescendingOrder;
@@ -107,6 +107,8 @@ FunctionSelection::FunctionSelection( TopLevelBase* top,
     hboxLayout->addWidget(searchLabel);
 
     searchEdit = new QLineEdit(this);
+    searchEdit->setClearButtonEnabled(true);
+    searchEdit->setPlaceholderText(tr("Search Query"));
     searchLabel->setBuddy(searchEdit);
     hboxLayout->addWidget(searchEdit);
 
@@ -233,11 +235,11 @@ void FunctionSelection::setData(TraceData* d)
 {
     TraceItemView::setData(d);
 
-    _group = 0;
+    _group = nullptr;
     _groupSize.clear();
     _hc.clear(GlobalConfig::maxListCount());
     groupList->clear();
-    functionListModel->resetModelData(d, 0, QString(), 0);
+    functionListModel->resetModelData(d, nullptr, QString(), nullptr);
 }
 
 void FunctionSelection::searchReturnPressed()
@@ -250,7 +252,7 @@ void FunctionSelection::searchReturnPressed()
         item  = groupList->currentItem();
         if (!item || item->isHidden()) {
             int i;
-            item = 0;
+            item = nullptr;
             for (i=0; i<groupList->topLevelItemCount(); i++) {
                 item = groupList->topLevelItem(i);
                 if (!item->isHidden()) break;
@@ -285,9 +287,9 @@ void FunctionSelection::queryDelayed()
 void FunctionSelection::functionContext(const QPoint & p)
 {
     QMenu popup;
-    TraceFunction* f = 0;
+    TraceFunction* f = nullptr;
 
-    QAction* activateFunctionAction = 0;
+    QAction* activateFunctionAction = nullptr;
     QModelIndex i = functionList->indexAt(p);
     if (i.isValid()) {
         f = functionListModel->function(i);
@@ -406,7 +408,7 @@ CostItem* FunctionSelection::canShow(CostItem* i)
         break;
 
     default:
-        i = 0;
+        i = nullptr;
         break;
     }
     return i;
@@ -468,7 +470,7 @@ void FunctionSelection::doUpdate(int changeType, bool)
     }
 
     if (changeType == activeItemChanged) {
-        if (_activeItem ==0) {
+        if (_activeItem ==nullptr) {
             functionList->clearSelection();
             return;
         }
@@ -536,7 +538,7 @@ void FunctionSelection::doUpdate(int changeType, bool)
             case ProfileContext::File:   _group = f->file();  break;
             case ProfileContext::FunctionCycle: _group = f->cycle();  break;
             default:
-                _group = 0;
+                _group = nullptr;
                 break;
             }
         }
@@ -570,7 +572,7 @@ void FunctionSelection::setGroup(TraceCostItem* g)
     if (g == _group) return;
     _group = g;
 
-    QTreeWidgetItem* item = 0;
+    QTreeWidgetItem* item = nullptr;
     int i;
     for (i=0; i < groupList->topLevelItemCount(); i++) {
         item = groupList->topLevelItem(i);
@@ -582,7 +584,7 @@ void FunctionSelection::setGroup(TraceCostItem* g)
         groupList->scrollToItem(item);
         // prohibit signalling of a group selection
         _inSetGroup = true;
-        _group = 0;
+        _group = nullptr;
         groupList->setCurrentItem(item);
         _inSetGroup = false;
     }
@@ -603,7 +605,7 @@ void FunctionSelection::refresh()
     functionListModel->setMaxCount(GlobalConfig::maxListCount());
 
     if (!_data || _data->parts().count()==0) {
-        functionListModel->resetModelData(0, 0, QString(), 0);
+        functionListModel->resetModelData(nullptr, nullptr, QString(), nullptr);
         selectTopFunction();
         return;
     }
@@ -652,7 +654,7 @@ void FunctionSelection::refresh()
 
     default:
     {
-        _group = 0;
+        _group = nullptr;
         functionListModel->resetModelData(_data, _group, _searchString, _eventType);
         selectFunction(dynamic_cast<TraceFunction*>(_activeItem));
         setCostColumnWidths();
@@ -664,7 +666,7 @@ void FunctionSelection::refresh()
     if (_activeItem && (_activeItem->type() == _groupType))
         _group = (TraceCostItem*) _activeItem;
 
-    QTreeWidgetItem *item = 0, *activeItem = 0;
+    QTreeWidgetItem *item = nullptr, *activeItem = nullptr;
     QList<QTreeWidgetItem*> items;
 
     // we always put group of active item in list, even if
@@ -708,7 +710,7 @@ void FunctionSelection::refresh()
     if (activeItem) {
         groupList->scrollToItem(activeItem);
         _inSetGroup = true;
-        _group = 0;
+        _group = nullptr;
         groupList->setCurrentItem(activeItem);
         _inSetGroup = false;
     }
@@ -765,7 +767,7 @@ TraceCostItem* FunctionSelection::group(QString s)
             return item->costItem();
     }
 
-    return 0;
+    return nullptr;
 }
 
 
@@ -811,7 +813,7 @@ void FunctionSelection::query(QString query)
     QRegExp re(query, Qt::CaseInsensitive, QRegExp::Wildcard);
     _groupSize.clear();
 
-    TraceFunction* f = 0;
+    TraceFunction* f = nullptr;
     TraceFunctionList list2;
 
     _hc.clear(GlobalConfig::maxListCount());
@@ -872,7 +874,7 @@ bool FunctionSelection::selectTopFunction()
 
     functionActivated(i);
 
-    return (f!=0);
+    return (f!=nullptr);
 }
 
 void FunctionSelection::setCostColumnWidths()

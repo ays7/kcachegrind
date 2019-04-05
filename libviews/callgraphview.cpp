@@ -84,6 +84,10 @@ public:
         const CanvasEdge* ce2 = ge2->canvasEdge();
 
         // sort invisible edges (ie. without matching CanvasEdge) in front
+        if (!ce1 && !ce2) {
+            // strict ordering required for std::sort
+            return (ge1 < ge2);
+        }
         if (!ce1) return true;
         if (!ce2) return false;
 
@@ -131,9 +135,9 @@ public:
 
 GraphNode::GraphNode()
 {
-    _f=0;
+    _f=nullptr;
     self = incl = 0;
-    _cn = 0;
+    _cn = nullptr;
 
     _visible = false;
     _lastCallerIndex = _lastCalleeIndex = -1;
@@ -236,10 +240,10 @@ TraceCall* GraphNode::visibleCaller()
     // can not use at(): index can be -1 (out of bounds), result is 0 then
     GraphEdge* e = callers.value(_lastCallerIndex);
     if (e && !e->isVisible())
-        e = 0;
+        e = nullptr;
     if (!e) {
         double maxCost = 0.0;
-        GraphEdge* maxEdge = 0;
+        GraphEdge* maxEdge = nullptr;
         for(int i = 0; i<callers.size(); i++) {
             e = callers[i];
             if (e->isVisible() && (e->cost > maxCost)) {
@@ -250,7 +254,7 @@ TraceCall* GraphNode::visibleCaller()
         }
         e = maxEdge;
     }
-    return e ? e->call() : 0;
+    return e ? e->call() : nullptr;
 }
 
 TraceCall* GraphNode::visibleCallee()
@@ -261,11 +265,11 @@ TraceCall* GraphNode::visibleCallee()
 
     GraphEdge* e = callees.value(_lastCalleeIndex);
     if (e && !e->isVisible())
-        e = 0;
+        e = nullptr;
 
     if (!e) {
         double maxCost = 0.0;
-        GraphEdge* maxEdge = 0;
+        GraphEdge* maxEdge = nullptr;
         for(int i = 0; i<callees.size(); i++) {
             e = callees[i];
             if (e->isVisible() && (e->cost > maxCost)) {
@@ -276,7 +280,7 @@ TraceCall* GraphNode::visibleCallee()
         }
         e = maxEdge;
     }
-    return e ? e->call() : 0;
+    return e ? e->call() : nullptr;
 }
 
 void GraphNode::setCallee(GraphEdge* e)
@@ -310,7 +314,7 @@ TraceFunction* GraphNode::nextVisible()
         if (c)
             return c->called(true);
     }
-    return 0;
+    return nullptr;
 }
 
 TraceFunction* GraphNode::priorVisible()
@@ -332,7 +336,7 @@ TraceFunction* GraphNode::priorVisible()
         if (c)
             return c->called(true);
     }
-    return 0;
+    return nullptr;
 }
 
 TraceCall* GraphNode::nextVisibleCaller(GraphEdge* e)
@@ -346,7 +350,7 @@ TraceCall* GraphNode::nextVisibleCaller(GraphEdge* e)
         }
         idx++;
     }
-    return 0;
+    return nullptr;
 }
 
 TraceCall* GraphNode::nextVisibleCallee(GraphEdge* e)
@@ -360,7 +364,7 @@ TraceCall* GraphNode::nextVisibleCallee(GraphEdge* e)
         }
         idx++;
     }
-    return 0;
+    return nullptr;
 }
 
 TraceCall* GraphNode::priorVisibleCaller(GraphEdge* e)
@@ -375,7 +379,7 @@ TraceCall* GraphNode::priorVisibleCaller(GraphEdge* e)
         }
         idx--;
     }
-    return 0;
+    return nullptr;
 }
 
 TraceCall* GraphNode::priorVisibleCallee(GraphEdge* e)
@@ -390,7 +394,7 @@ TraceCall* GraphNode::priorVisibleCallee(GraphEdge* e)
         }
         idx--;
     }
-    return 0;
+    return nullptr;
 }
 
 
@@ -400,11 +404,11 @@ TraceCall* GraphNode::priorVisibleCallee(GraphEdge* e)
 
 GraphEdge::GraphEdge()
 {
-    _c=0;
-    _from = _to = 0;
-    _fromNode = _toNode = 0;
+    _c=nullptr;
+    _from = _to = nullptr;
+    _fromNode = _toNode = nullptr;
     cost = count = 0;
-    _ce = 0;
+    _ce = nullptr;
 
     _visible = false;
     _lastFromCaller = true;
@@ -432,7 +436,7 @@ TraceFunction* GraphEdge::visibleCaller()
             _fromNode->setCallee(this);
         return _from;
     }
-    return 0;
+    return nullptr;
 }
 
 TraceFunction* GraphEdge::visibleCallee()
@@ -443,12 +447,12 @@ TraceFunction* GraphEdge::visibleCallee()
             _toNode->setCaller(this);
         return _to;
     }
-    return 0;
+    return nullptr;
 }
 
 TraceCall* GraphEdge::nextVisible()
 {
-    TraceCall* res = 0;
+    TraceCall* res = nullptr;
 
     if (_lastFromCaller && _fromNode) {
         res = _fromNode->nextVisibleCallee(this);
@@ -464,7 +468,7 @@ TraceCall* GraphEdge::nextVisible()
 
 TraceCall* GraphEdge::priorVisible()
 {
-    TraceCall* res = 0;
+    TraceCall* res = nullptr;
 
     if (_lastFromCaller && _fromNode) {
         res = _fromNode->priorVisibleCallee(this);
@@ -530,9 +534,9 @@ StorableGraphOptions::StorableGraphOptions()
 GraphExporter::GraphExporter()
 {
     _go = this;
-    _tmpFile = 0;
-    _item = 0;
-    reset(0, 0, 0, ProfileContext::InvalidType, QString());
+    _tmpFile = nullptr;
+    _item = nullptr;
+    reset(nullptr, nullptr, nullptr, ProfileContext::InvalidType, QString());
 }
 
 GraphExporter::GraphExporter(TraceData* d, TraceFunction* f,
@@ -540,8 +544,8 @@ GraphExporter::GraphExporter(TraceData* d, TraceFunction* f,
                              QString filename)
 {
     _go = this;
-    _tmpFile = 0;
-    _item = 0;
+    _tmpFile = nullptr;
+    _item = nullptr;
     reset(d, f, ct, gt, filename);
 }
 
@@ -575,7 +579,7 @@ void GraphExporter::reset(TraceData*, CostItem* i, EventType* ct,
         case ProfileContext::Call:
             break;
         default:
-            i = 0;
+            i = nullptr;
         }
     }
 
@@ -593,7 +597,7 @@ void GraphExporter::reset(TraceData*, CostItem* i, EventType* ct,
         _dotName = _tmpFile->fileName();
         _useBox = true;
     } else {
-        _tmpFile = 0;
+        _tmpFile = nullptr;
         _dotName = filename;
         _useBox = false;
     }
@@ -603,7 +607,7 @@ void GraphExporter::reset(TraceData*, CostItem* i, EventType* ct,
 
 void GraphExporter::setGraphOptions(GraphOptions* go)
 {
-    if (go == 0)
+    if (go == nullptr)
         go = this;
     _go = go;
 }
@@ -663,8 +667,8 @@ void GraphExporter::writeDot(QIODevice* device)
     if (!_item)
         return;
 
-    QFile* file = 0;
-    QTextStream* stream = 0;
+    QFile* file = nullptr;
+    QTextStream* stream = nullptr;
 
     if (device)
         stream = new QTextStream(device);
@@ -696,7 +700,7 @@ void GraphExporter::writeDot(QIODevice* device)
     if (_go->layout() == LeftRight) {
         *stream << QStringLiteral("  rankdir=LR;\n");
     } else if (_go->layout() == Circular) {
-        TraceFunction *f = 0;
+        TraceFunction *f = nullptr;
         switch (_item->type()) {
         case ProfileContext::Function:
         case ProfileContext::FunctionCycle:
@@ -740,7 +744,7 @@ void GraphExporter::writeDot(QIODevice* device)
             g = f->cycle();
             break;
         default:
-            g = 0;
+            g = nullptr;
             break;
         }
         nLists[g].append(&n);
@@ -843,7 +847,7 @@ void GraphExporter::writeDot(QIODevice* device)
             countSum = n.callerCountSum();
             if (costSum > _realCallLimit) {
 
-                QPair<TraceFunction*,TraceFunction*> p(0, n.function());
+                QPair<TraceFunction*,TraceFunction*> p(nullptr, n.function());
                 e = &(_edgeMap[p]);
                 e->setCallee(p.second);
                 e->cost = costSum;
@@ -864,7 +868,7 @@ void GraphExporter::writeDot(QIODevice* device)
             countSum = n.calleeCountSum();
             if (costSum > _realCallLimit) {
 
-                QPair<TraceFunction*,TraceFunction*> p(n.function(), 0);
+                QPair<TraceFunction*,TraceFunction*> p(n.function(), nullptr);
                 e = &(_edgeMap[p]);
                 e->setCaller(p.first);
                 e->cost = costSum;
@@ -915,11 +919,11 @@ void GraphExporter::sortEdges()
 TraceFunction* GraphExporter::toFunc(QString s)
 {
     if (s[0] != 'F')
-        return 0;
+        return nullptr;
     bool ok;
     TraceFunction* f = (TraceFunction*) s.midRef(1).toULongLong(&ok, 16);
     if (!ok)
-        return 0;
+        return nullptr;
 
     return f;
 }
@@ -927,11 +931,11 @@ TraceFunction* GraphExporter::toFunc(QString s)
 GraphNode* GraphExporter::node(TraceFunction* f)
 {
     if (!f)
-        return 0;
+        return nullptr;
 
     GraphNodeMap::Iterator it = _nodeMap.find(f);
     if (it == _nodeMap.end())
-        return 0;
+        return nullptr;
 
     return &(*it);
 }
@@ -940,7 +944,7 @@ GraphEdge* GraphExporter::edge(TraceFunction* f1, TraceFunction* f2)
 {
     GraphEdgeMap::Iterator it = _edgeMap.find(qMakePair(f1, f2));
     if (it == _edgeMap.end())
-        return 0;
+        return nullptr;
 
     return &(*it);
 }
@@ -964,7 +968,7 @@ void GraphExporter::buildGraph(TraceFunction* f, int depth, bool toCallees,
 
     double oldIncl = 0.0;
     GraphNode& n = _nodeMap[f];
-    if (n.function() == 0) {
+    if (n.function() == nullptr) {
         n.setFunction(f);
     } else
         oldIncl = n.incl;
@@ -978,7 +982,7 @@ void GraphExporter::buildGraph(TraceFunction* f, int depth, bool toCallees,
     // A negative depth limit means "unlimited"
     int maxDepth = toCallees ? _go->maxCalleeDepth()
                              : _go->maxCallerDepth();
-    // Never go beyound a depth of 100
+    // Never go beyond a depth of 100
     if ((maxDepth < 0) || (maxDepth>100)) maxDepth = 100;
     if (depth >= maxDepth) {
         if (0)
@@ -1029,7 +1033,7 @@ void GraphExporter::buildGraph(TraceFunction* f, int depth, bool toCallees,
         QPair<TraceFunction*,TraceFunction*> p(toCallees ? f : f2,
                                                toCallees ? f2 : f);
         GraphEdge& e = _edgeMap[p];
-        if (e.call() == 0) {
+        if (e.call() == nullptr) {
             e.setCall(call);
             e.setCaller(p.first);
             e.setCallee(p.second);
@@ -1049,7 +1053,7 @@ void GraphExporter::buildGraph(TraceFunction* f, int depth, bool toCallees,
             QPair<TraceFunction*,TraceFunction*>
                     realP(toCallees ? f : realF, toCallees ? realF : f);
             GraphEdge& e = _edgeMap[realP];
-            if (e.call() == 0) {
+            if (e.call() == nullptr) {
                 e.setCall(call);
                 e.setCaller(realP.first);
                 e.setCallee(realP.second);
@@ -1356,8 +1360,8 @@ void CanvasEdgeArrow::paint(QPainter* p,
 CanvasEdge::CanvasEdge(GraphEdge* e) :
     _edge(e)
 {
-    _label = 0;
-    _arrow = 0;
+    _label = nullptr;
+    _arrow = nullptr;
     _thickness = 0;
 
     setFlag(QGraphicsItem::ItemIsSelectable);
@@ -1435,7 +1439,7 @@ void CanvasEdge::paint(QPainter* p,
 // CanvasFrame
 //
 
-QPixmap* CanvasFrame::_p = 0;
+QPixmap* CanvasFrame::_p = nullptr;
 
 CanvasFrame::CanvasFrame(CanvasNode* n)
 {
@@ -1512,12 +1516,12 @@ CallGraphView::CallGraphView(TraceItemView* parentView, QWidget* parent,
     _zoomPosition = DEFAULT_ZOOMPOS;
     _lastAutoPosition = TopLeft;
 
-    _scene = 0;
+    _scene = nullptr;
     _xMargin = _yMargin = 0;
     _panningView = new PanningView(this);
     _panningZoom = 1;
-    _selectedNode = 0;
-    _selectedEdge = 0;
+    _selectedNode = nullptr;
+    _selectedEdge = nullptr;
     _isMoving = false;
 
     _exporter.setGraphOptions(this);
@@ -1538,8 +1542,8 @@ CallGraphView::CallGraphView(TraceItemView* parentView, QWidget* parent,
     // tooltips...
     //_tip = new CallGraphTip(this);
 
-    _renderProcess = 0;
-    _prevSelectedNode = 0;
+    _renderProcess = nullptr;
+    _prevSelectedNode = nullptr;
     connect(&_renderTimer, &QTimer::timeout,
             this, &CallGraphView::showRenderWarning);
 }
@@ -1739,8 +1743,8 @@ void CallGraphView::keyPressEvent(QKeyEvent* e)
                                              ||(e->key() == Qt::Key_Down)||(e->key() == Qt::Key_Left)||(e->key()
                                                                                                         == Qt::Key_Right))) {
 
-        TraceFunction* f = 0;
-        TraceCall* c = 0;
+        TraceFunction* f = nullptr;
+        TraceCall* c = nullptr;
 
         // rotate arrow key meaning for LeftRight layout
         int key = e->key();
@@ -1837,7 +1841,7 @@ CostItem* CallGraphView::canShow(CostItem* i)
             break;
         }
     }
-    return 0;
+    return nullptr;
 }
 
 void CallGraphView::doUpdate(int changeType, bool)
@@ -1853,8 +1857,8 @@ void CallGraphView::doUpdate(int changeType, bool)
         if (!_selectedItem)
             return;
 
-        GraphNode* n = 0;
-        GraphEdge* e = 0;
+        GraphNode* n = nullptr;
+        GraphEdge* e = nullptr;
         if ((_selectedItem->type() == ProfileContext::Function)
             ||(_selectedItem->type() == ProfileContext::FunctionCycle)) {
             n = _exporter.node((TraceFunction*)_selectedItem);
@@ -1871,14 +1875,14 @@ void CallGraphView::doUpdate(int changeType, bool)
         if (_selectedNode && _selectedNode->canvasNode()) {
             _selectedNode->canvasNode()->setSelected(false);
         }
-        _selectedNode = 0;
+        _selectedNode = nullptr;
         if (_selectedEdge && _selectedEdge->canvasEdge()) {
             _selectedEdge->canvasEdge()->setSelected(false);
         }
-        _selectedEdge = 0;
+        _selectedEdge = nullptr;
 
         // select
-        CanvasNode* sNode = 0;
+        CanvasNode* sNode = nullptr;
         if (n && n->canvasNode()) {
             _selectedNode = n;
             _selectedNode->canvasNode()->setSelected(true);
@@ -1927,8 +1931,8 @@ void CallGraphView::doUpdate(int changeType, bool)
     if (changeType & dataChanged) {
         // invalidate old selection and graph part
         _exporter.reset(_data, _activeItem, _eventType, _groupType);
-        _selectedNode = 0;
-        _selectedEdge = 0;
+        _selectedNode = nullptr;
+        _selectedEdge = nullptr;
     }
 
     refresh();
@@ -1939,10 +1943,10 @@ void CallGraphView::clear()
     if (!_scene)
         return;
 
-    _panningView->setScene(0);
-    setScene(0);
+    _panningView->setScene(nullptr);
+    setScene(nullptr);
     delete _scene;
-    _scene = 0;
+    _scene = nullptr;
 }
 
 void CallGraphView::showText(QString s)
@@ -2002,7 +2006,7 @@ void CallGraphView::stopRendering()
 
     // forget about this process, not interesting any longer
     _renderProcess->deleteLater();
-    _renderProcess = 0;
+    _renderProcess = nullptr;
     _unparsedOutput = QString();
 
     _renderTimer.setSingleShot(true);
@@ -2044,11 +2048,11 @@ void CallGraphView::refresh()
     if (1)
         qDebug() << "CallGraphView::refresh";
 
-    _selectedNode = 0;
-    _selectedEdge = 0;
+    _selectedNode = nullptr;
+    _selectedEdge = nullptr;
 
     /*
-     * Call 'dot' asynchronoulsy in the background with the aim to
+     * Call 'dot' asynchronously in the background with the aim to
      * - have responsive GUI while layout task runs (potentially long!)
      * - notify user about a long run, using a timer
      * - kill long running 'dot' processes when another layout is
@@ -2103,7 +2107,7 @@ void CallGraphView::readDotOutput()
     qDebug("CallGraphView::readDotOutput: QProcess %p", p);
 
     // signal from old/uninteresting process?
-    if ((_renderProcess == 0) || (p != _renderProcess)) {
+    if ((_renderProcess == nullptr) || (p != _renderProcess)) {
         p->deleteLater();
         return;
     }
@@ -2118,7 +2122,7 @@ void CallGraphView::dotError()
            p->error(), p);
 
     // signal from old/uninteresting process?
-    if ((_renderProcess == 0) || (p != _renderProcess)) {
+    if ((_renderProcess == nullptr) || (p != _renderProcess)) {
         p->deleteLater();
         return;
     }
@@ -2127,7 +2131,7 @@ void CallGraphView::dotError()
 
     // not interesting any longer
     _renderProcess->deleteLater();
-    _renderProcess = 0;
+    _renderProcess = nullptr;
 }
 
 
@@ -2137,14 +2141,14 @@ void CallGraphView::dotExited()
     qDebug("CallGraphView::dotExited: QProcess %p", p);
 
     // signal from old/uninteresting process?
-    if ((_renderProcess == 0) || (p != _renderProcess)) {
+    if ((_renderProcess == nullptr) || (p != _renderProcess)) {
         p->deleteLater();
         return;
     }
 
     _unparsedOutput.append(QString::fromLocal8Bit(_renderProcess->readAllStandardOutput()));
     _renderProcess->deleteLater();
-    _renderProcess = 0;
+    _renderProcess = nullptr;
 
     QString line, cmd;
     CanvasNode *rItem;
@@ -2154,8 +2158,8 @@ void CallGraphView::dotExited()
     QTextStream* dotStream;
     double scale = 1.0, scaleX = 1.0, scaleY = 1.0;
     double dotWidth = 0, dotHeight = 0;
-    GraphNode* activeNode = 0;
-    GraphEdge* activeEdge = 0;
+    GraphNode* activeNode = nullptr;
+    GraphEdge* activeEdge = nullptr;
 
     _renderTimer.stop();
     viewport()->setUpdatesEnabled(false);
@@ -2248,7 +2252,7 @@ void CallGraphView::dotExited()
             continue;
         }
 
-        if (_scene == 0) {
+        if (_scene == nullptr) {
             qDebug() << "Ignoring '"<< cmd
                      << "' without 'graph' from dot ("<< _exporter.filename()
                      << ":"<< lineno << ")";
@@ -2369,8 +2373,8 @@ void CallGraphView::dotExited()
 
         // calls into/out of cycles are special: make them blue
         QColor arrowColor = Qt::black;
-        TraceFunction* caller = e->fromNode() ? e->fromNode()->function() : 0;
-        TraceFunction* called = e->toNode() ? e->toNode()->function() : 0;
+        TraceFunction* caller = e->fromNode() ? e->fromNode()->function() : nullptr;
+        TraceFunction* called = e->toNode() ? e->toNode()->function() : nullptr;
         if ( (caller && (caller->cycle() == caller)) ||
              (called && (called->cycle() == called)) ) arrowColor = Qt::blue;
 
@@ -2395,7 +2399,7 @@ void CallGraphView::dotExited()
 
         // check if head is at start of spline...
         // this is needed because dot always gives points from top to bottom
-        CanvasNode* fromNode = e->fromNode() ? e->fromNode()->canvasNode() : 0;
+        CanvasNode* fromNode = e->fromNode() ? e->fromNode()->canvasNode() : nullptr;
         if (fromNode) {
             QPointF toCenter = fromNode->rect().center();
             qreal dx0 = poly.point(0).x() - toCenter.x();
@@ -2527,7 +2531,7 @@ void CallGraphView::dotExited()
         }
     }
 
-    CanvasNode* sNode = 0;
+    CanvasNode* sNode = nullptr;
     if (_selectedNode)
         sNode = _selectedNode->canvasNode();
     else if (_selectedEdge) {
@@ -2566,7 +2570,7 @@ void CallGraphView::dotExited()
     viewport()->setUpdatesEnabled(true);
 
     delete _renderProcess;
-    _renderProcess = 0;
+    _renderProcess = nullptr;
 }
 
 
@@ -2667,7 +2671,7 @@ void CallGraphView::mouseReleaseEvent(QMouseEvent*)
 void CallGraphView::mouseDoubleClickEvent(QMouseEvent* e)
 {
     QGraphicsItem* i = itemAt(e->pos());
-    if (i == 0)
+    if (i == nullptr)
         return;
 
     if (i->type() == CANVAS_NODE) {
@@ -2722,6 +2726,7 @@ QMenu* CallGraphView::addCallerDepthMenu(QMenu* menu)
     a->setEnabled(_funcLimit>0.005);
     m->addSeparator();
     addCallerDepthAction(m, tr("Depth 0", "None"), 0);
+    addCallerDepthAction(m, tr("max. 1"), 1);
     addCallerDepthAction(m, tr("max. 2"), 2);
     addCallerDepthAction(m, tr("max. 5"), 5);
     addCallerDepthAction(m, tr("max. 10"), 10);
@@ -2735,7 +2740,7 @@ QMenu* CallGraphView::addCallerDepthMenu(QMenu* menu)
 
 void CallGraphView::callerDepthTriggered(QAction* a)
 {
-    _maxCallerDepth = a->data().toInt(0);
+    _maxCallerDepth = a->data().toInt(nullptr);
     refresh();
 }
 
@@ -2761,6 +2766,7 @@ QMenu* CallGraphView::addCalleeDepthMenu(QMenu* menu)
     a->setEnabled(_funcLimit>0.005);
     m->addSeparator();
     addCalleeDepthAction(m, tr("Depth 0", "None"), 0);
+    addCalleeDepthAction(m, tr("max. 1"), 1);
     addCalleeDepthAction(m, tr("max. 2"), 2);
     addCalleeDepthAction(m, tr("max. 5"), 5);
     addCalleeDepthAction(m, tr("max. 10"), 10);
@@ -2774,7 +2780,7 @@ QMenu* CallGraphView::addCalleeDepthMenu(QMenu* menu)
 
 void CallGraphView::calleeDepthTriggered(QAction* a)
 {
-    _maxCalleeDepth = a->data().toInt(0);
+    _maxCalleeDepth = a->data().toInt(nullptr);
     refresh();
 }
 
@@ -2817,7 +2823,7 @@ QMenu* CallGraphView::addNodeLimitMenu(QMenu* menu)
 
 void CallGraphView::nodeLimitTriggered(QAction* a)
 {
-    _funcLimit = a->data().toDouble(0);
+    _funcLimit = a->data().toDouble(nullptr);
     refresh();
 }
 
@@ -2854,7 +2860,7 @@ QMenu* CallGraphView::addCallLimitMenu(QMenu* menu)
 
 void CallGraphView::callLimitTriggered(QAction* a)
 {
-    _callLimit = a->data().toDouble(0);
+    _callLimit = a->data().toDouble(nullptr);
     refresh();
 }
 
@@ -2890,7 +2896,7 @@ QMenu* CallGraphView::addZoomPosMenu(QMenu* menu)
 
 void CallGraphView::zoomPosTriggered(QAction* a)
 {
-    _zoomPosition = (ZoomPosition) a->data().toInt(0);
+    _zoomPosition = (ZoomPosition) a->data().toInt(nullptr);
     updateSizes();
 }
 
@@ -2923,7 +2929,7 @@ QMenu* CallGraphView::addLayoutMenu(QMenu* menu)
 
 void CallGraphView::layoutTriggered(QAction* a)
 {
-    _layout = (Layout) a->data().toInt(0);
+    _layout = (Layout) a->data().toInt(nullptr);
     refresh();
 }
 
@@ -2935,12 +2941,12 @@ void CallGraphView::contextMenuEvent(QContextMenuEvent* e)
     QGraphicsItem* i = itemAt(e->pos());
 
     QMenu popup;
-    TraceFunction *f = 0, *cycle = 0;
-    TraceCall* c = 0;
+    TraceFunction *f = nullptr, *cycle = nullptr;
+    TraceCall* c = nullptr;
 
-    QAction* activateFunction = 0;
-    QAction* activateCycle = 0;
-    QAction* activateCall = 0;
+    QAction* activateFunction = nullptr;
+    QAction* activateCycle = nullptr;
+    QAction* activateCall = nullptr;
     if (i) {
         if (i->type() == CANVAS_NODE) {
             GraphNode* n = ((CanvasNode*)i)->node();
@@ -2986,7 +2992,7 @@ void CallGraphView::contextMenuEvent(QContextMenuEvent* e)
         }
     }
 
-    QAction* stopLayout = 0;
+    QAction* stopLayout = nullptr;
     if (_renderProcess) {
         stopLayout = popup.addAction(tr("Stop Layouting"));
         popup.addSeparator();

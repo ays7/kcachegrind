@@ -70,6 +70,16 @@ QString getObjDump()
     return env.value(QStringLiteral("OBJDUMP"), QStringLiteral("objdump"));
 }
 
+static
+QString getObjDumpFormat()
+{
+    if (env.isEmpty())
+        env = QProcessEnvironment::systemEnvironment();
+
+    return env.value(QStringLiteral("OBJDUMP_FORMAT"));
+}
+
+
 // parsing output of 'objdump'
 
 static Addr parseAddr(char* buf)
@@ -254,13 +264,13 @@ void InstrView::context(const QPoint & p)
     int c = columnAt(p.x());
     QTreeWidgetItem* i = itemAt(p);
 
-    TraceInstrCall* ic = i ? ((InstrItem*) i)->instrCall() : 0;
-    TraceInstrJump* ij = i ? ((InstrItem*) i)->instrJump() : 0;
-    TraceFunction* f = ic ? ic->call()->called() : 0;
-    TraceInstr* instr = ij ? ij->instrTo() : 0;
+    TraceInstrCall* ic = i ? ((InstrItem*) i)->instrCall() : nullptr;
+    TraceInstrJump* ij = i ? ((InstrItem*) i)->instrJump() : nullptr;
+    TraceFunction* f = ic ? ic->call()->called() : nullptr;
+    TraceInstr* instr = ij ? ij->instrTo() : nullptr;
 
-    QAction* activateFunctionAction = 0;
-    QAction* activateInstrAction = 0;
+    QAction* activateFunctionAction = nullptr;
+    QAction* activateInstrAction = nullptr;
     if (f) {
         QString menuText = tr("Go to '%1'").arg(GlobalConfig::shortenSymbol(f->prettyName()));
         activateFunctionAction = popup.addAction(menuText);
@@ -294,6 +304,7 @@ void InstrView::context(const QPoint & p)
         // remember width when hiding
         if (!_showHexCode)
             _lastHexCodeWidth = columnWidth(4);
+        // fixme: when showing, width may be wrong if not initially shown
         setColumnWidths();
     }
 }
@@ -375,7 +386,7 @@ CostItem* InstrView::canShow(CostItem* i)
         break;
     }
 
-    return 0;
+    return nullptr;
 }
 
 
@@ -390,7 +401,7 @@ void InstrView::doUpdate(int changeType, bool)
         }
 
         QList<QTreeWidgetItem*> items = selectedItems();
-        InstrItem* ii = (items.count() > 0) ? (InstrItem*)items[0] : 0;
+        InstrItem* ii = (items.count() > 0) ? (InstrItem*)items[0] : nullptr;
         if (ii) {
             if ((ii->instr() == _selectedItem) ||
                 (ii->instr() && (ii->instr()->line() == _selectedItem))) return;
@@ -398,7 +409,7 @@ void InstrView::doUpdate(int changeType, bool)
                 (ii->instrCall()->call()->called() == _selectedItem)) return;
         }
 
-        TraceInstrJump* ij = 0;
+        TraceInstrJump* ij = nullptr;
         if (_selectedItem->type() == ProfileContext::InstrJump)
             ij = (TraceInstrJump*) _selectedItem;
 
@@ -415,7 +426,7 @@ void InstrView::doUpdate(int changeType, bool)
                 _inSelectionUpdate = false;
                 break;
             }
-            item2 = 0;
+            item2 = nullptr;
             for (int j=0; i<item->childCount(); j++) {
                 item2 = item->child(j);
                 ii = (InstrItem*)item2;
@@ -460,12 +471,9 @@ void InstrView::setColumnWidths()
 #else
     header()->setResizeMode(4, QHeaderView::Interactive);
 #endif
-    if (_showHexCode) {
+    setColumnHidden(4, !_showHexCode);
+    if (_showHexCode)
         setColumnWidth(4, _lastHexCodeWidth);
-    }
-    else {
-        setColumnWidth(4, 0);
-    }
 }
 
 // compare functions for jump arrow drawing
@@ -494,8 +502,11 @@ bool instrJumpLowLessThan(const TraceInstrJump* ij1,
 
     if (addr1Low != addr2Low) return (addr1Low < addr2Low);
     // jump ends come before jump starts
-    if (addr1Low == ij1->instrTo()->addr()) return true;
-    if (addr2Low == ij2->instrTo()->addr()) return false;
+    bool low1IsEnd = (addr1Low == ij1->instrTo()->addr());
+    bool low2IsEnd = (addr2Low == ij2->instrTo()->addr());
+    if (low1IsEnd && !low2IsEnd) return true;
+    if (low2IsEnd && !low1IsEnd) return false;
+    // both the low address of jump 1 and 2 are end or start
     return (addr1High < addr2High);
 }
 
@@ -510,8 +521,11 @@ bool instrJumpHighLessThan(const TraceInstrJump* ij1,
 
     if (addr1High != addr2High) return (addr1High < addr2High);
     // jump ends come before jump starts
-    if (addr1High == ij1->instrTo()->addr()) return true;
-    if (addr2High == ij2->instrTo()->addr()) return false;
+    bool high1IsEnd = (addr1High == ij1->instrTo()->addr());
+    bool high2IsEnd = (addr2High == ij2->instrTo()->addr());
+    if (high1IsEnd && !high2IsEnd) return true;
+    if (high2IsEnd && !high1IsEnd) return false;
+    // both the high address of jump 1 and 2 are end or start
     return (addr1Low < addr2Low);
 }
 
@@ -522,19 +536,12 @@ void InstrView::refresh()
     clear();
     setColumnWidth(0, 20);
     setColumnWidth(1, 50);
-    setColumnWidth(2, _eventType2 ? 50:0);
-    setColumnWidth(3, 0);   // arrows, defaults to invisible
-    setColumnWidth(4, 0);   // hex code column
+    setColumnHidden(2, (_eventType2 == nullptr));
+    setColumnWidth(2, 50);
+    setColumnHidden(3, true); // arrows, defaults to invisible
+    setColumnHidden(4, true); // hex code column, defaults to invisible
     setColumnWidth(5, 50);  // command column
     setColumnWidth(6, 250); // arg column
-
-    // reset to automatic sizing to get column width
-#if QT_VERSION >= 0x050000
-    header()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
-#else
-    header()->setResizeMode(4, QHeaderView::ResizeToContents);
-#endif
-
 
     if (_eventType)
         headerItem()->setText(1, _eventType->name());
@@ -545,7 +552,7 @@ void InstrView::refresh()
     if (!_data || !_activeItem) return;
 
     ProfileContext::Type t = _activeItem->type();
-    TraceFunction* f = 0;
+    TraceFunction* f = nullptr;
     if (t == ProfileContext::Function) f = (TraceFunction*) _activeItem;
     if (t == ProfileContext::Instr) {
         f = ((TraceInstr*)_activeItem)->function();
@@ -581,6 +588,16 @@ void InstrView::refresh()
         new InstrItem(this, this, 5, tr("      --collect-jumps=yes"));
         setColumnWidths();
         return;
+    }
+
+    if (_showHexCode) {
+        // make column visible and set to automatic sizing to get column width
+        setColumnHidden(4, false);
+#if QT_VERSION >= 0x050000
+        header()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
+#else
+        header()->setResizeMode(4, QHeaderView::ResizeToContents);
+#endif
     }
 
     // initialisation for arrow drawing
@@ -641,7 +658,6 @@ void InstrView::refresh()
 #else
         header()->setResizeMode(2, QHeaderView::Interactive);
 #endif
-        setColumnWidth(2, 0);
     }
 
     // reset to the original position - this is useful when the view
@@ -692,7 +708,7 @@ void InstrView::updateJumpArray(Addr addr, InstrItem* ii,
 
         if (iStart==_arrowLevels) {
             for(iStart=0; iStart<_arrowLevels; ++iStart)
-                if (_jump[iStart] == 0) break;
+                if (_jump[iStart] == nullptr) break;
             if (iStart==_arrowLevels) {
                 _arrowLevels++;
                 _jump.resize(_arrowLevels);
@@ -741,11 +757,11 @@ void InstrView::updateJumpArray(Addr addr, InstrItem* ii,
         if (highAddr > addr)
             break;
         else {
-            if (iEnd>=0) _jump[iEnd] = 0;
+            if (iEnd>=0) _jump[iEnd] = nullptr;
             iEnd = -1;
         }
     }
-    if (iEnd>=0) _jump[iEnd] = 0;
+    if (iEnd>=0) _jump[iEnd] = nullptr;
 }
 
 
@@ -832,18 +848,19 @@ bool InstrView::fillInstrRange(TraceFunction* function,
 
     // call objdump synchronously
     QString objfile = dir + '/' + function->object()->shortName();
-    QStringList objdumpArgs = QStringList()
-                              << QStringLiteral("-C") << QStringLiteral("-d")
-                              << QStringLiteral("--start-address=0x%1").arg(dumpStartAddr.toString())
-                              << QStringLiteral("--stop-address=0x%1").arg(dumpEndAddr.toString())
-                              << objfile;
+    QString objdump_format = getObjDumpFormat();
+    if (objdump_format.isEmpty())
+        objdump_format = getObjDump() + " -C -d --start-address=0x%1 --stop-address=0x%2 %3";
+    QString objdumpCmd = objdump_format
+            .arg(dumpStartAddr.toString())
+            .arg(dumpEndAddr.toString())
+            .arg(objfile);
 
-    QString objdumpCmd = getObjDump() + " " + objdumpArgs.join(QStringLiteral(" "));
     qDebug("Running '%s'...", qPrintable(objdumpCmd));
 
     // and run...
     QProcess objdump;
-    objdump.start(getObjDump(), objdumpArgs);
+    objdump.start(objdumpCmd);
     if (!objdump.waitForStarted() ||
         !objdump.waitForFinished()) {
 
@@ -867,7 +884,7 @@ bool InstrView::fillInstrRange(TraceFunction* function,
     int objdumpLineno = 0, dumpedLines = 0, noAssLines = 0;
     SubCost most = 0;
     TraceInstr* currInstr;
-    InstrItem *ii, *ii2, *item = 0, *first = 0, *selected = 0;
+    InstrItem *ii, *ii2, *item = nullptr, *first = nullptr, *selected = nullptr;
     QString code, cmd, args;
     bool needObjAddr = true, needCostAddr = true;
 
@@ -944,7 +961,7 @@ bool InstrView::fillInstrRange(TraceFunction* function,
                 needCostAddr = true;
             }
             else
-                currInstr = 0;
+                currInstr = nullptr;
 
             needObjAddr = true;
 
@@ -988,7 +1005,7 @@ bool InstrView::fillInstrRange(TraceFunction* function,
         if ( ((costAddr==0)     || (addr > costAddr + 3*context)) &&
              ((nextCostAddr==0) || (addr < nextCostAddr - 3*context)) ) {
 
-            // the very last skipLine can be ommitted
+            // the very last skipLine can be omitted
             if ((it == itEnd) &&
                 (itEnd == function->instrMap()->end())) skipLineWritten=true;
 
@@ -1005,7 +1022,7 @@ bool InstrView::fillInstrRange(TraceFunction* function,
             skipLineWritten = false;
 
 
-        ii = new InstrItem(this, 0, addr, inside,
+        ii = new InstrItem(this, nullptr, addr, inside,
                            code, cmd, args, currInstr);
         items.append(ii);
 
@@ -1111,10 +1128,12 @@ bool InstrView::fillInstrRange(TraceFunction* function,
         }
     }
 
-    if (arrowLevels())
+    if (arrowLevels()) {
+        setColumnHidden(3, false);
         setColumnWidth(3, 10 + 6*arrowLevels() + 2);
+    }
     else
-        setColumnWidth(3, 0);
+        setColumnHidden(3, true);
 
     if (noAssLines > 1) {
         // trace cost not matching code

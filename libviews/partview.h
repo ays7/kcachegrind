@@ -33,21 +33,21 @@ class PartView: public QTreeWidget, public TraceItemView
     Q_OBJECT
 
 public:
-    explicit PartView(TraceItemView* parentView, QWidget* parent=0);
+    explicit PartView(TraceItemView* parentView, QWidget* parent=nullptr);
 
-    virtual QWidget* widget() { return this; }
-    QString whatsThis() const;
+    QWidget* widget() override { return this; }
+    QString whatsThis() const override;
 
     void refresh();
 
-private slots:
+private Q_SLOTS:
     void context(const QPoint &);
     void selectionChangedSlot();
     void headerClicked(int);
 
 private:
-    CostItem* canShow(CostItem*);
-    void doUpdate(int, bool);
+    CostItem* canShow(CostItem*) override;
+    void doUpdate(int, bool) override;
 
     bool _inSelectionUpdate;
 };
