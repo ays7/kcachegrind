@@ -15,6 +15,12 @@ target_link_libraries(qcachegrind
         Qt5::DBus)
 
 if(APPLE)
+        
+  set_target_properties(qcachegrind PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
+    MACOSX_BUNDLE_ICON_FILE kcachegrind.icns
+    )
+  
   # bundle stuff
   set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
   set(DATA_INSTALL_DIR   "qcachegrind.app/Contents/Resources")
@@ -24,6 +30,9 @@ if(APPLE)
             DESTINATION "${DATA_INSTALL_DIR}")
   endif()
 
+  install(FILES kcachegrind.icns
+    DESTINATION "${DATA_INSTALL_DIR}")
+  
 endif(APPLE)
       
 
